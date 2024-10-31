@@ -1,0 +1,66 @@
+name: mikirudata
+description: "A new Flutter project."
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  rflutter_alert: ^2.0.4
+  http: ^1.2.2
+  syncfusion_flutter_datagrid: ^27.1.48
+  printing: ^5.13.2
+  pdf: ^3.7.0
+  flutter_emoji: ^2.5.1
+  font_awesome_flutter: ^10.7.0
+  badges: ^3.1.2
+  go_router: ^14.2.7
+  flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.1.0
+  image_picker: ^1.1.2
+  get: ^4.6.6
+  line_awesome_flutter: ^3.0.1
+  carousel_slider: ^5.0.0
+  url_launcher: ^6.3.0
+  permission_handler: ^11.3.1
+  monnify_payment_sdk: ^1.0.3
+  webview_flutter: ^4.9.0
+  flutter_custom_tabs: ^2.1.0
+  fluro: ^2.0.3
+  monnify_flutter_sdk_plus: ^1.1.3
+  uuid: ^3.0.6
+  js: ^0.6.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_native_splash: ^2.4.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/imk.png
+    - assets/images/background.jpg
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Bold.ttf
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/imk.png"
+
+flutter_native_splash:
+  color: "#42a5f5"  # Background color for the splash screen
+  image: assets/images/imk.png  # Path to your splash screen image
+  android: true
+  ios: true
+  fullscreen: true  # Optional: For full-screen splash
