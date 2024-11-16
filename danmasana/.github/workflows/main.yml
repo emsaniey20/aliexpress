@@ -1,74 +1,72 @@
-name: Flutter Build
+name: Flutter Build and Firebase Test Lab
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v2
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v1
+      with:
+        java-version: '17'
 
-      - name: Cache Flutter and Dependencies
-        uses: actions/cache@v3
-        with:
-          paths: |
-            $HOME/.pub-cache/
-            $HOME/flutter/bin/cache/
-            ./android/.gradle/
-          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.yaml') }}
+    - name: Install Flutter
+      run: |
+        git clone https://github.com/flutter/flutter.git -b stable
+        echo "${{ github.workspace }}/flutter/bin" >> $GITHUB_PATH
 
-      - name: Check Flutter Installation
-        run: |
-          flutter --version
-          if [ $? -eq 0 ]; then
-            echo "Flutter is installed!"
-          else
-            echo "Flutter is not installed! Please check runner configuration."
-            exit 1
-          fi
+    - name: Install Dependencies
+      run: flutter pub get
 
-      - name: Install Dependencies
-        run: flutter pub get
+    - name: Create Native Splash Screen
+      run: flutter pub run flutter_native_splash:create
 
-      - name: Create Native Splash Screen
-        run: flutter pub run flutter_native_splash:create
+    - name: Decode Keystore from Base64
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./android/app/my-release-key.jks
+        keytool -v -list -keystore ./android/app/my-release-key.keystore \
+          -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
+          -noprompt
 
-      - name: Create Keystore (using Secrets)
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ./android/app/my-release-key.jks
+    - name: Build App Bundle
+      run: flutter build appbundle --release
 
-      - name: Validate Keystore (using Secrets)
-        run: |
-          keytool -v -list -keystore ./android/app/my-release-key.jks -storepass ${{ secrets.KEYSTORE_PASSWORD }}
+    - name: Upload App Bundle as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: flutter_app_bundle
+        path: build/app/outputs/bundle/release/app-release.aab
 
-      - name: Build App Bundle (using Secrets)
-        run: |
-          cd android
-          ./gradlew assembleRelease -Pandroid.injected.signing.store.file=./app/my-release-key.jks \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+    - name: Install Firebase CLI
+      run: |
+        curl -sL https://firebase.tools | bash
+        firebase --version
 
-      - name: Validate AAB
-        run: |
-          apksigner verify --verbose android/app/build/outputs/bundle/release/app-release.aab
+    - name: Authenticate with Firebase
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      run: |
+        echo "${GOOGLE_APPLICATION_CREDENTIALS}" > "$HOME/service-account.json"
+        gcloud auth activate-service-account --key-file="$HOME/service-account.json"
+        gcloud config set project mikrudata
 
-      - name: Upload AAB
-        uses: actions/upload-artifact@v3
-        with:
-          name: flutter_app_aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
+    - name: Upload to Firebase Test Lab
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      run: |
+        firebase test android run \
+          --app build/app/outputs/bundle/release/app-release.aab \
+          --device model=Pixel5,version=30,locale=en,orientation=portrait \
+          --timeout 30m
+
+    - name: Cleanup
+      run: rm "$HOME/service-account.json"

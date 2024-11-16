@@ -1,11 +1,8 @@
 name: mikirudata
 description: "A new Flutter project."
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none' 
 
-# The following defines the version and build number for your application.
 version: 1.0.0+1
 
 environment:
@@ -19,7 +16,7 @@ dependencies:
   rflutter_alert: ^2.0.4
   http: ^1.2.2
   syncfusion_flutter_datagrid: ^27.1.48
-  printing: ^5.13.2
+  printing: ^5.13.4
   pdf: ^3.7.0
   flutter_emoji: ^2.5.1
   font_awesome_flutter: ^10.7.0
@@ -27,7 +24,6 @@ dependencies:
   go_router: ^14.2.7
   flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.1.0
-  image_picker: ^1.1.2
   get: ^4.6.6
   line_awesome_flutter: ^3.0.1
   carousel_slider: ^5.0.0
@@ -39,12 +35,15 @@ dependencies:
   fluro: ^2.0.3
   monnify_flutter_sdk_plus: ^1.1.3
   uuid: ^3.0.6
-  
+  js: ^0.6.7
+  image_picker: ^1.1.2
+  flutter_svg: ^2.0.11
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
@@ -59,3 +58,10 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/imk.png"
+
+flutter_native_splash:
+  color: "#42a5f5"  # Background color for the splash screen
+  image: assets/images/imk.png  # Path to your splash screen image
+  android: true
+  ios: true
+  fullscreen: true  # Optional: For full-screen splash

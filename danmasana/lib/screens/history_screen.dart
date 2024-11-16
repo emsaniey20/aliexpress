@@ -14,6 +14,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   late TransactionDataSource transactionDataSource;
   bool isLoading = true;
   bool hasError = false;
+  
 
   @override
   void initState() {
@@ -185,16 +186,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     transactionDataSource
                                         .transactions[selectedIndex];
                                 Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        TransactionDetailScreen(
-                                      transaction: selectedTransaction,
-                                      responseMessage: selectedTransaction
-                                          .responseMessage, // Pass the responseMessage
-                                    ),
-                                  ),
-                                );
+  context,
+  MaterialPageRoute(
+    builder: (context) => TransactionDetailScreen(
+      transaction: selectedTransaction,
+      responseMessage: selectedTransaction.responseMessage ?? "No response available", // Handle nullable responseMessage
+    ),
+  ),
+);
+
                               }
                             }),
                       ),
@@ -211,7 +211,7 @@ class Transaction {
   final double amount;
   final String identifierNumber;
   final DateTime dateTime;
-  final String responseMessage; // Add responseMessage
+  final String? responseMessage; // Make responseMessage nullable
 
   Transaction({
     required this.transactionId,
@@ -219,7 +219,7 @@ class Transaction {
     required this.amount,
     required this.identifierNumber,
     required this.dateTime,
-    required this.responseMessage, // Include responseMessage in the constructor
+    this.responseMessage, // Handle responseMessage as nullable
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -229,10 +229,11 @@ class Transaction {
       amount: json['amount'].toDouble(),
       identifierNumber: json['identifierNumber'],
       dateTime: DateTime.parse(json['dateTime']),
-      responseMessage: json['responseMessage'], // Parse responseMessage
+      responseMessage: json['responseMessage'], // Assign it directly (nullable)
     );
   }
 }
+
 
 class TransactionDataSource extends DataGridSource {
   List<DataGridRow> _transactions = [];

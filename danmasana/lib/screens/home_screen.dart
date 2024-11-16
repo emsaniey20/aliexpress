@@ -50,12 +50,15 @@ class HomeScreen extends StatelessWidget {
   // Fetch user data from API
   Future<Map<String, dynamic>> _fetchUserData() async {
     try {
-      final response = await getRequest('https://app.mikirudata.com.ng/api/user/details');
+      final response =
+          await getRequest('https://app.mikirudata.com.ng/api/user/details');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        if (data is! Map<String, dynamic> || !data.containsKey('wallet_balance') || !data.containsKey('username')) {
+        if (data is! Map<String, dynamic> ||
+            !data.containsKey('wallet_balance') ||
+            !data.containsKey('username')) {
           throw Exception('Invalid API response format');
         }
 
@@ -71,14 +74,9 @@ class HomeScreen extends StatelessWidget {
       }
     } catch (e) {
       print('Error fetching user data: $e');
-      return {
-        'wallet_balance': 0.0,
-        'username': 'Failed'
-      };
+      return {'wallet_balance': 0.0, 'username': 'Failed'};
     }
   }
-
- 
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +86,12 @@ class HomeScreen extends StatelessWidget {
     });
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 600;
-    final double containerWidth = isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
+    final double containerWidth =
+        isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
 
     return Scaffold(
-      appBar: AppBar(    title: Row(
+      appBar: AppBar(
+        title: Row(
           children: [
             WavingHandIcon(),
             const SizedBox(width: 10),
@@ -135,14 +135,13 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Stack(
             children: [
-            IconButton(
-  icon: const Icon(Icons.notifications, color: Colors.white),
-  onPressed: () {
-    print("Navigating to notification");
-    router.navigateTo(context, '/notification');
-  },
-),
-
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () {
+                  print("Navigating to notification");
+                  router.navigateTo(context, '/notification');
+                },
+              ),
               if (unreadMessages > 0)
                 Positioned(
                   right: 11,
@@ -172,131 +171,135 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           PopupMenuButton<String>(
-  icon: const Icon(Icons.person, color: Colors.white),
-  onSelected: (String value) async {
-    print("Selected: $value");
-    if (value == 'profile') {
-      print("Navigating to profile");
-      router.navigateTo(context, '/profile');
-    } else if (value == 'logout') {
-      final response = await logout();
-      if (response.statusCode == 200) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('auth_token');
-        print("Navigating to login");
-        router.navigateTo(context, '/login');
-      } else {
-        Alert(
-          context: context,
-          type: AlertType.error,
-          title: "Logout Failed",
-          desc: "Unable to logout. Please try again.",
-          buttons: [
-            DialogButton(
-              child: const Text(
-                "OK",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-              onPressed: () => Navigator.pop(context),
-              width: 120,
-            )
-          ],
-        ).show();
-      }
-    }
-  },
-  itemBuilder: (BuildContext context) {
-    return [
-      const PopupMenuItem<String>(
-        value: 'profile',
-        child: Text('Profile'),
-      ),
-      const PopupMenuItem<String>(
-        value: 'logout',
-        child: Text('Logout'),
-      ),
-    ];
-  },
-),
-
-        ],
-      ),
-      body: Stack(
-        children: [
-          FutureBuilder<Map<String, dynamic>>(
-            future: _fetchUserData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error fetching user data: ${snapshot.error}'));
-              } else if (snapshot.hasData && snapshot.data != null) {
-                final userData = snapshot.data!;
-                final wallet = Wallet(
-                  name: userData['username'],
-                  balance: userData['wallet_balance'],
-                  bonus: 0.0, // Or use appropriate value if available
-                );
-
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Container(
-                          height: 220,
-                          margin: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[900],
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          width: containerWidth,
-                          child: WalletCard(wallet: wallet, walletBalance: userData['wallet_balance']),
+            icon: const Icon(Icons.person, color: Colors.white),
+            onSelected: (String value) async {
+              print("Selected: $value");
+              if (value == 'profile') {
+                print("Navigating to profile");
+                router.navigateTo(context, '/profile');
+              } else if (value == 'logout') {
+                final response = await logout();
+                if (response.statusCode == 200) {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('auth_token');
+                  print("Navigating to login");
+                  router.navigateTo(context, '/auth/login');
+                } else {
+                  Alert(
+                    context: context,
+                    type: AlertType.error,
+                    title: "Logout Failed",
+                    desc: "Unable to logout. Please try again.",
+                    buttons: [
+                      DialogButton(
+                        child: const Text(
+                          "OK",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
-                      ),
-                     const SizedBox(height: 20),
-AnimatedTextContainer(),
-const SizedBox(height: 20),
-ServiceIconsCard(router: router),  // Pass the router here
-const SizedBox(height: 20),
-ServiceCardsRow(router: router),  // Pass the router here
-
+                        onPressed: () => Navigator.pop(context),
+                        width: 120,
+                      )
                     ],
-                  ),
-                );
-              } else {
-                return const Center(child: Text('No wallet data available'));
+                  ).show();
+                }
               }
             },
-          ),
-            Positioned(
-          bottom: 20,
-          right: 20,
-          child: FloatingActionButton(
-            onPressed: () {
-              _launchWhatsApp();
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'profile',
+                  child: Text('Profile'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text('Logout'),
+                ),
+              ];
             },
-            child: const FaIcon(
-              FontAwesomeIcons.whatsapp,
-              color: Colors.white,
-            ),
-            backgroundColor: Colors.green,
           ),
-        ),
         ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _fetchUserData,
+        child: Stack(
+          children: [
+            FutureBuilder<Map<String, dynamic>>(
+              future: _fetchUserData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child:
+                          Text('Error fetching user data: ${snapshot.error}'));
+                } else if (snapshot.hasData && snapshot.data != null) {
+                  final userData = snapshot.data!;
+                  final wallet = Wallet(
+                    name: userData['username'],
+                    balance: userData['wallet_balance'],
+                    bonus: 0.0, // Or use appropriate value if available
+                  );
+
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            height: 220,
+                            margin: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[900],
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            width: containerWidth,
+                            child: WalletCard(
+                                wallet: wallet,
+                                walletBalance: userData['wallet_balance']),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        AnimatedTextContainer(),
+                        const SizedBox(height: 20),
+                        ServiceIconsCard(
+                            router: router), // Pass the router here
+                        const SizedBox(height: 20),
+                        ServiceCardsRow(router: router), // Pass the router here
+                      ],
+                    ),
+                  );
+                } else {
+                  return const Center(child: Text('No wallet data available'));
+                }
+              },
+            ),
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: FloatingActionButton(
+                onPressed: () {
+                  _launchWhatsApp();
+                },
+                child: const FaIcon(
+                  FontAwesomeIcons.whatsapp,
+                  color: Colors.white,
+                ),
+                backgroundColor: Colors.green,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-
 
 void _launchWhatsApp() async {
   final phoneNumber = '+2348111250431';
@@ -311,17 +314,33 @@ void _launchWhatsApp() async {
   }
 }
 
+bool hasShownAnnouncement =
+    false; // Global or shared state to track if the announcement has been shown
 
- bool hasShownAnnouncement = false; // Global or shared state to track if the announcement has been shown
-
+// Method to fetch announcement with token in header
 Future<String> fetchAnnouncement() async {
-  final response = await https.get(Uri.parse('https://app.mikirudata.com.ng/api/messages/welcome-message'));
+  // Fetch the token from SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('auth_token');
 
+  // Prepare the headers with the token
+  final headers = {
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json',
+  };
+
+  // Make the GET request with headers
+  final response = await https.get(
+    Uri.parse('https://app.mikirudata.com.ng/api/messages/welcome-message1'),
+    headers: headers,
+  );
+
+  // Handle the response
   if (response.statusCode == 200) {
     final jsonResponse = json.decode(response.body);
     return jsonResponse['message'];
   } else {
-    throw Exception('Failed to load announcement');
+    throw Exception('Failed to load announcement: ${response.statusCode}');
   }
 }
 
@@ -333,7 +352,7 @@ void _showAnnouncement(BuildContext context) async {
 
   try {
     String message = await fetchAnnouncement();
-    
+
     // Show the dialog only if the announcement hasn't been shown before
     Alert(
       context: context,
@@ -348,7 +367,8 @@ void _showAnnouncement(BuildContext context) async {
           ),
           onPressed: () {
             Navigator.pop(context);
-            hasShownAnnouncement = true; // Set the flag after the dialog is closed
+            hasShownAnnouncement =
+                true; // Set the flag after the dialog is closed
           },
           width: 120,
         )
@@ -373,13 +393,15 @@ void _showAnnouncement(BuildContext context) async {
     ).show();
   }
 }
+
 // A widget for a waving hand icon
 class WavingHandIcon extends StatefulWidget {
   @override
   _WavingHandIconState createState() => _WavingHandIconState();
 }
 
-class _WavingHandIconState extends State<WavingHandIcon> with SingleTickerProviderStateMixin {
+class _WavingHandIconState extends State<WavingHandIcon>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -441,7 +463,6 @@ void _showErrorDialog(BuildContext context, String title, String message) {
   ).show();
 }
 
-
 class ApiService {
   static Future<Map<String, String>> getAuthHeaders() async {
     final prefs = await SharedPreferences.getInstance();
@@ -478,7 +499,6 @@ class ApiService {
     }
   }
 }
-
 
 class WalletCard extends StatefulWidget {
   final Wallet wallet;
@@ -591,9 +611,7 @@ class _WalletCardState extends State<WalletCard> {
                 ],
               ),
               Text(
-                accountDetails.isNotEmpty
-                    ? accountDetails['bank']!
-                    : 'N/A',
+                accountDetails.isNotEmpty ? accountDetails['bank']! : 'N/A',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
@@ -696,7 +714,8 @@ class _AnimatedTextContainerState extends State<AnimatedTextContainer>
   Future<void> _fetchBankAccountDetails() async {
     final details = await ApiService.fetchBankAccountDetails();
     setState(() {
-      accountName = 'MFY/MUSA IBRAHIM/${details['name']}/${details['bank']}/${details['number']}';
+      accountName =
+          'MFY/MUSA IBRAHIM/${details['name']}/${details['bank']}/${details['number']}';
       accountText = accountName;
     });
   }
@@ -739,7 +758,6 @@ class _AnimatedTextContainerState extends State<AnimatedTextContainer>
   }
 }
 
-
 class ServiceIconsCard extends StatelessWidget {
   final FluroRouter router; // Add router parameter
 
@@ -750,7 +768,8 @@ class ServiceIconsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 600;
-    final double containerWidth = isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
+    final double containerWidth =
+        isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
 
     return Container(
       width: containerWidth,
@@ -797,7 +816,6 @@ class ServiceIconsCard extends StatelessWidget {
   }
 }
 
-
 class ServiceIcon extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -826,6 +844,7 @@ class ServiceIcon extends StatelessWidget {
     );
   }
 }
+
 class ServiceCardsRow extends StatelessWidget {
   final FluroRouter router; // Add a router parameter
 
@@ -836,7 +855,8 @@ class ServiceCardsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 600;
-    final double containerWidth = isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
+    final double containerWidth =
+        isMobile ? screenWidth * 0.9 : screenWidth * 0.5;
 
     return Container(
       width: containerWidth,

@@ -26,82 +26,102 @@ final FluroRouter router = FluroRouter();
 // Define the route handlers
 void defineRoutes(FluroRouter router) {
   // Define public routes
-  router.define('/auth/login', handler: Handler(
-    handlerFunc: (context, parameters) => LoginScreen(router: router),
-  ));
+  router.define('/auth/login',
+      handler: Handler(
+        handlerFunc: (context, parameters) => LoginScreen(router: router),
+      ));
 
-  router.define('/auth/forget/password', handler: Handler(
-    handlerFunc: (context, parameters) => ForgotPasswordScreen(),
-  ));
+  router.define('/auth/forget/password',
+      handler: Handler(
+        handlerFunc: (context, parameters) => ForgotPasswordScreen(),
+      ));
 
-  router.define('/auth/register', handler: Handler(
-    handlerFunc: (context, parameters) => RegisterScreen(router: router),
-  ));
+  router.define('/auth/register',
+      handler: Handler(
+        handlerFunc: (context, parameters) => RegisterScreen(router: router),
+      ));
 
   // Define protected routes
-  router.define('/', handler: Handler( // Set HomeScreen as default route
-    handlerFunc: (context, parameters) => HomeScreen(router: router),
-  ));
+  router.define('/',
+      handler: Handler(
+        // Set HomeScreen as default route
+        handlerFunc: (context, parameters) => HomeScreen(router: router),
+      ));
 
-  router.define('/notification', handler: Handler(
-    handlerFunc: (context, parameters) => NotificationScreen(),
-  ));
+  router.define('/notification',
+      handler: Handler(
+        handlerFunc: (context, parameters) => NotificationScreen(),
+      ));
 
-  router.define('/funding', handler: Handler(
-    handlerFunc: (context, parameters) => FundScreen(),
-  ));
+  router.define('/funding',
+      handler: Handler(
+        handlerFunc: (context, parameters) => FundScreen(),
+      ));
 
-  router.define('/upgrade', handler: Handler(
-    handlerFunc: (context, parameters) => UpgradeScreen(),
-  ));
+  router.define('/upgrade',
+      handler: Handler(
+        handlerFunc: (context, parameters) => UpgradeScreen(),
+      ));
 
-  router.define('/history', handler: Handler(
-    handlerFunc: (context, parameters) => TransactionScreen(),
-  ));
+  router.define('/history',
+      handler: Handler(
+        handlerFunc: (context, parameters) => TransactionScreen(),
+      ));
 
-  router.define('/our-prices', handler: Handler(
-    handlerFunc: (context, parameters) => OurPricesScreen(),
-  ));
+  router.define('/our-prices',
+      handler: Handler(
+        handlerFunc: (context, parameters) => OurPricesScreen(),
+      ));
 
-  router.define('/data-plan', handler: Handler(
-    handlerFunc: (context, parameters) => DataPlanScreen(),
-  ));
+  router.define('/data-plan',
+      handler: Handler(
+        handlerFunc: (context, parameters) => DataPlanScreen(),
+      ));
 
-  router.define('/airtime', handler: Handler(
-    handlerFunc: (context, parameters) => AirtimeScreen(),
-  ));
+  router.define('/airtime',
+      handler: Handler(
+        handlerFunc: (context, parameters) => AirtimeScreen(),
+      ));
 
-  router.define('/tv-cable', handler: Handler(
-    handlerFunc: (context, parameters) => TVCableScreen(),
-  ));
+  router.define('/tv-cable',
+      handler: Handler(
+        handlerFunc: (context, parameters) => TVCableScreen(),
+      ));
 
-  router.define('/exam', handler: Handler(
-    handlerFunc: (context, parameters) => ExamScreen(),
-  ));
+  router.define('/exam',
+      handler: Handler(
+        handlerFunc: (context, parameters) => ExamScreen(),
+      ));
 
-  router.define('/electric-bill', handler: Handler(
-    handlerFunc: (context, parameters) => ElectricBillScreen(),
-  ));
+  router.define('/electric-bill',
+      handler: Handler(
+        handlerFunc: (context, parameters) => ElectricBillScreen(),
+      ));
 
-  router.define('/profile', handler: Handler(
-    handlerFunc: (context, parameters) => ProfileScreen(),
-  ));
+  router.define('/profile',
+      handler: Handler(
+        handlerFunc: (context, parameters) => ProfileScreen(),
+      ));
 
-  router.define('/bulk-sms', handler: Handler(
-    handlerFunc: (context, parameters) => BulkSmsScreen(),
-  ));
+  router.define('/bulk-sms',
+      handler: Handler(
+        handlerFunc: (context, parameters) => BulkSmsScreen(),
+      ));
 
-  router.define('/airtime-2-cash', handler: Handler(
-    handlerFunc: (context, parameters) => Airtime2CashScreen(),
-  ));
+  router.define('/airtime-2-cash',
+      handler: Handler(
+        handlerFunc: (context, parameters) => Airtime2CashScreen(),
+      ));
 
-  router.define('/announcement', handler: Handler(
-    handlerFunc: (context, parameters) => NotificationScreen(),
-  ));
+  router.define('/announcement',
+      handler: Handler(
+        handlerFunc: (context, parameters) => NotificationScreen(),
+      ));
 
-  router.define('/whatsapp', handler: Handler(
-    handlerFunc: (context, parameters) => WhatsAppScreen(),
-  ));
+  router.define('/whatsapp',
+      handler: Handler(
+        handlerFunc: (context, parameters) => WhatsAppScreen(),
+      ));
 }
 
 void main() {
@@ -121,9 +141,11 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasData && snapshot.data == true) {
-            return HomeScreen(router: router); // User is logged in, show HomeScreen
+            return HomeScreen(
+                router: router); // User is logged in, show HomeScreen
           } else {
-            return LoginScreen(router: router); // User is not logged in, show LoginScreen
+            return LoginScreen(
+                router: router); // User is not logged in, show LoginScreen
           }
         },
       ),

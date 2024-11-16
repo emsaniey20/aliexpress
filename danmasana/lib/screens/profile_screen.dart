@@ -22,6 +22,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _fetchUserDetails();
   }
+Widget _buildDeleteAccountOption(BuildContext context) {
+  return InkWell(
+    onTap: () {
+      _showDeleteAccountDialog(context);
+    },
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.red.shade900),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            'Delete Account',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.red.shade900,
+            ),
+          ),
+          Icon(
+            Icons.delete,
+            color: Colors.red.shade900,
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Future<String?> _getStoredToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,6 +91,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return response;
   }
 
+  Future<void> _deleteAccount() async {
+  // Show a loading indicator
+  Alert(
+    context: context,
+    title: "Deleting Account...",
+    desc: "Please wait.",
+    type: AlertType.info,
+    style: AlertStyle(
+      isCloseButton: false,
+      isButtonVisible: false,
+    ),
+  ).show();
+
+  try {
+    final response = await https.delete(
+      Uri.parse('https://app.mikirudata.com.ng/api/user/delete-account'),
+      headers: await _getAuthHeaders(),
+    );
+
+    Navigator.pop(context); // Close the loading dialog
+
+    if (response.statusCode == 200) {
+      Alert(
+        context: context,
+        title: "Success",
+        desc: "Your account has been successfully deleted.",
+        type: AlertType.success,
+        buttons: [
+          DialogButton(
+            child: const Text(
+              "OK",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              // Perform any additional logout or redirection here
+              Navigator.of(context).pushReplacementNamed('/login');
+            },
+            color: Colors.blue.shade900,
+          ),
+        ],
+      ).show();
+    } else {
+      Alert(
+        context: context,
+        title: "Error",
+        desc: "Failed to delete account. Please try again.",
+        type: AlertType.error,
+      ).show();
+    }
+  } catch (e) {
+    Navigator.pop(context); // Close the loading dialog
+    Alert(
+      context: context,
+      title: "Error",
+      desc: "An unexpected error occurred.",
+      type: AlertType.error,
+    ).show();
+  }
+}
+
+  void _showDeleteAccountDialog(BuildContext context) {
+  Alert(
+    context: context,
+    title: "Delete Account",
+    desc: "Are you sure you want to delete your account? This action cannot be undone.",
+    type: AlertType.warning,
+    buttons: [
+      DialogButton(
+        child: const Text(
+          "Cancel",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        onPressed: () {
+          Navigator.pop(context); // Close the dialog
+        },
+        color: Colors.grey,
+      ),
+      DialogButton(
+        child: const Text(
+          "Delete",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        onPressed: () async {
+          Navigator.pop(context); // Close the dialog
+          await _deleteAccount(); // Call the account deletion function
+        },
+        color: Colors.red.shade900,
+      ),
+    ],
+  ).show();
+}
+
+
+  
   Future<void> _fetchUserDetails() async {
     try {
       final response = await _getRequest('https://app.mikirudata.com.ng/api/user/details');
@@ -89,6 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ).show();
     }
   }
+
 
   Future<void> _showChangeDialog(BuildContext context, String title, String apiEndpoint) async {
     final oldController = TextEditingController();
@@ -213,63 +340,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).show();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: Colors.blue.shade900,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Profile'),
+      backgroundColor: Colors.blue.shade900,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            // Profile Picture
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: const AssetImage('assets/profile_picture.png'), // Add your profile picture here
-              ),
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: <Widget>[
+          // Profile Picture
+          Center(
+            child: CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey.shade300,
+              backgroundImage: const AssetImage('assets/profile_picture.png'), // Add your profile picture here
             ),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
 
-            // Full Name
-            _buildProfileField(context, 'Full Name', fullName),
-            const SizedBox(height: 16),
+          // Full Name
+          _buildProfileField(context, 'Full Name', fullName),
+          const SizedBox(height: 16),
 
-            // Username
-            _buildProfileField(context, 'Username', username),
-            const SizedBox(height: 16),
+          // Username
+          _buildProfileField(context, 'Username', username),
+          const SizedBox(height: 16),
 
-            // Email
-            _buildProfileField(context, 'Email', email),
-            const SizedBox(height: 16),
+          // Email
+          _buildProfileField(context, 'Email', email),
+          const SizedBox(height: 16),
 
-            // Phone Number
-            _buildProfileField(context, 'Phone Number', phoneNumber),
-            const SizedBox(height: 32),
+          // Phone Number
+          _buildProfileField(context, 'Phone Number', phoneNumber),
+          const SizedBox(height: 32),
 
-            // Change Transaction Pin
-            _buildChangeOption(context, 'Change Transaction Pin', () {
-              _showChangeDialog(context, 'Change Transaction Pin', '/api/user/change-pin');
-            }),
+          // Change Transaction Pin
+          _buildChangeOption(context, 'Change Transaction Pin', () {
+            _showChangeDialog(context, 'Change Transaction Pin', '/api/user/change-pin');
+          }),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Change Password
-            _buildChangeOption(context, 'Change Password', () {
-              _showChangeDialog(context, 'Change Password', '/api/user/change-password');
-            }),
-          ],
-        ),
+          // Change Password
+          _buildChangeOption(context, 'Change Password', () {
+            _showChangeDialog(context, 'Change Password', '/api/user/change-password');
+          }),
+
+          const SizedBox(height: 16),
+
+          // Delete Account Option
+          _buildDeleteAccountOption(context), // Added Delete Account Option
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildProfileField(BuildContext context, String label, String value) {
     return Container(
@@ -332,3 +464,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+

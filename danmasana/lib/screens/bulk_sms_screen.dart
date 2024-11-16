@@ -5,7 +5,6 @@ import 'package:http/http.dart' as https;
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class BulkSmsScreen extends StatefulWidget {
   @override
   _BulkSmsScreenState createState() => _BulkSmsScreenState();
@@ -81,8 +80,9 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   }
 
   Future<void> _validateTransactionPin(String pin) async {
-    final url = Uri.parse('https://app.mikirudata.com.ng/api/auth/validate-pin');
-    
+    final url =
+        Uri.parse('https://app.mikirudata.com.ng/api/auth/validate-pin');
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
 
@@ -118,7 +118,8 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
         }
       } else {
         // Handle unexpected status codes
-        _showAlert("Failed", "Pin validation failed. Please try again.", AlertType.error);
+        _showAlert("Failed", "Pin validation failed. Please try again.",
+            AlertType.error);
       }
     } catch (e) {
       _showAlert("Error", "Error: $e", AlertType.error);
@@ -126,62 +127,68 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   }
 
   Future<void> _submitBulkSms() async {
-  final url = Uri.parse('https://app.mikirudata.com.ng/api/bulksms/purchase');
+    final url = Uri.parse('https://app.mikirudata.com.ng/api/bulksms/purchase');
 
-  // Retrieve the token from SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('auth_token');
+    // Retrieve the token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
 
-  // Construct the request payload
-  final requestBody = {
-    'sender': senderNameController.text,
-    'numbers': phoneNumbersController.text.split(',').map((number) => number.trim()).toList(),
-    'message': messageController.text,
-    'requestId': 'BulkSMS_${DateTime.now().millisecondsSinceEpoch}', // Example requestId
-  };
+    // Construct the request payload
+    final requestBody = {
+      'sender': senderNameController.text,
+      'numbers': phoneNumbersController.text
+          .split(',')
+          .map((number) => number.trim())
+          .toList(),
+      'message': messageController.text,
+      'requestId':
+          'BulkSMS_${DateTime.now().millisecondsSinceEpoch}', // Example requestId
+    };
 
-  // Debug prints to check the payload
-  print('Request URL: $url');
-  print('Request Payload: ${json.encode(requestBody)}');
+    // Debug prints to check the payload
+    print('Request URL: $url');
+    print('Request Payload: ${json.encode(requestBody)}');
 
-  try {
-    final response = await https.post(
-      url,
-      headers: {
-        'Authorization': token != null ? 'Bearer $token' : '',
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(requestBody),
-    );
+    try {
+      final response = await https.post(
+        url,
+        headers: {
+          'Authorization': token != null ? 'Bearer $token' : '',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(requestBody),
+      );
 
-    print('Response Status Code: ${response.statusCode}');
-    print('Response Body: ${response.body}');
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
 
-      // Handle the response data accordingly
-      if (data['success']) {
-        _showAlert("Success", "Bulk SMS sent successfully.", AlertType.success);
+        // Handle the response data accordingly
+        if (data['success']) {
+          _showAlert(
+              "Success", "Bulk SMS sent successfully.", AlertType.success);
+        } else {
+          // Error response from server
+          final errorMessage = data['message'] ?? "An unknown error occurred.";
+          print('Bulk SMS error message: $errorMessage');
+          _showAlert("Failed", errorMessage, AlertType.error);
+        }
       } else {
-        // Error response from server
-        final errorMessage = data['message'] ?? "An unknown error occurred.";
-        print('Bulk SMS error message: $errorMessage');
+        // Handle unexpected status codes
+        final errorMessage = response.body.isNotEmpty
+            ? json.decode(response.body)['message'] ??
+                "Bulk SMS submission failed. Please try again."
+            : "Bulk SMS submission failed. Please try again.";
         _showAlert("Failed", errorMessage, AlertType.error);
       }
-    } else {
-      // Handle unexpected status codes
-      final errorMessage = response.body.isNotEmpty
-          ? json.decode(response.body)['message'] ?? "Bulk SMS submission failed. Please try again."
-          : "Bulk SMS submission failed. Please try again.";
-      _showAlert("Failed", errorMessage, AlertType.error);
+    } catch (e) {
+      // Handle network or parsing errors
+      print('Exception occurred: $e');
+      _showAlert("Error", "An error occurred: $e", AlertType.error);
     }
-  } catch (e) {
-    // Handle network or parsing errors
-    print('Exception occurred: $e');
-    _showAlert("Error", "An error occurred: $e", AlertType.error);
   }
-}
 
   void _showAlert(String title, String desc, AlertType alertType) {
     Alert(
@@ -202,112 +209,117 @@ class _BulkSmsScreenState extends State<BulkSmsScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-         leading: IconButton(
-  icon: Icon(Icons.arrow_back, color: Colors.white),
-  onPressed: () {
-    Navigator.pop(context); // Navigate back to the previous route
-  },
-),
-      title: Center(
-        child: Text(
-          'Bulk SMS',
-          style: TextStyle(color: Colors.white),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous route
+          },
         ),
+        title: Center(
+          child: Text(
+            'Bulk SMS',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        backgroundColor: Colors.blue[900],
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      backgroundColor: Colors.blue[900],
-      iconTheme: IconThemeData(color: Colors.white),
-    ),
-    body: LayoutBuilder(
-      builder: (context, constraints) {
-        double screenWidth = constraints.maxWidth;
-        bool isLargeScreen = screenWidth > 600;
-        double containerWidth = isLargeScreen ? screenWidth * 0.5 : screenWidth * 0.8;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double screenWidth = constraints.maxWidth;
+          bool isLargeScreen = screenWidth > 600;
+          double containerWidth =
+              isLargeScreen ? screenWidth * 0.5 : screenWidth * 0.8;
 
-        return Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/background.jpg'),
-                  fit: BoxFit.cover,
+          return Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/background.jpg'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              child: Center(
-                child: Container(
-                  width: containerWidth,
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch, // Align children to stretch across width
-                        children: [
-                          Center(
-                      child: Text(
-                        'Bulk SMS',
-                        style: TextStyle(
-                          color: Colors.blue[900],
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                          // Sender Name Input
-                          CustomTextField(
-                            controller: senderNameController,
-                            hint: 'Enter Sender Name',
-                          ),
-                          SizedBox(height: 20),
-
-                          // Phone Numbers Input
-                          CustomTextField(
-                            controller: phoneNumbersController,
-                            hint: 'Type or paste up to 10000 numbers, separated by commas, no spaces',
-                            maxLines: 3,
-                          ),
-                          SizedBox(height: 20),
-
-                          // Message Input
-                          CustomTextField(
-                            controller: messageController,
-                            hint: 'Enter Your Message',
-                            maxLines: 5,
-                          ),
-                          SizedBox(height: 20),
-
-                          // Proceed Button
-                          ElevatedButton(
-                            onPressed: _onProceed,
-                            child: Text('Proceed'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[900],
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                              textStyle: TextStyle(fontSize: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
+                child: Center(
+                  child: Container(
+                    width: containerWidth,
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment
+                              .stretch, // Align children to stretch across width
+                          children: [
+                            Center(
+                              child: Text(
+                                'Bulk SMS',
+                                style: TextStyle(
+                                  color: Colors.blue[900],
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                            // Sender Name Input
+                            CustomTextField(
+                              controller: senderNameController,
+                              hint: 'Enter Sender Name',
+                            ),
+                            SizedBox(height: 20),
+
+                            // Phone Numbers Input
+                            CustomTextField(
+                              controller: phoneNumbersController,
+                              hint:
+                                  'Type or paste up to 10000 numbers, separated by commas, no spaces',
+                              maxLines: 3,
+                            ),
+                            SizedBox(height: 20),
+
+                            // Message Input
+                            CustomTextField(
+                              controller: messageController,
+                              hint: 'Enter Your Message',
+                              maxLines: 5,
+                            ),
+                            SizedBox(height: 20),
+
+                            // Proceed Button
+                            ElevatedButton(
+                              onPressed: _onProceed,
+                              child: Text('Proceed'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue[900],
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 50, vertical: 15),
+                                textStyle: TextStyle(fontSize: 18),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-    ),
-  );
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
-}
+
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -358,7 +370,8 @@ class PinInputField extends StatefulWidget {
 
 class _PinInputFieldState extends State<PinInputField> {
   List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
-  List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  List<TextEditingController> _controllers =
+      List.generate(4, (index) => TextEditingController());
 
   @override
   void initState() {
@@ -378,65 +391,92 @@ class _PinInputFieldState extends State<PinInputField> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(4, (index) {
-        return Container(
-          width: 50,
-          child: TextField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            maxLength: 1,
-            obscureText: true,
-            textInputAction: index == 3 ? TextInputAction.done : TextInputAction.next,
-            style: TextStyle(fontSize: 24),
-            decoration: InputDecoration(
-              counterText: "",
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 2, color: Colors.blue[900]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(width: 2, color: Colors.blue[900]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            "Enter Transaction PIN",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Only numeric input
-            onChanged: (value) {
-              if (value.isNotEmpty) {
-                // Move to the next field if it's not the last field
-                if (index < 3) {
-                  _focusNodes[index + 1].requestFocus();
-                } else {
-                  // If the last field is filled, complete the PIN entry
-                  String pin = _controllers.map((controller) => controller.text).join();
-                  widget.pinController.text = pin;
-                  widget.onComplete(pin);
-
-                  // Dismiss keyboard after PIN entry
-                  FocusScope.of(context).unfocus();
-                }
-              } else if (value.isEmpty && index > 0) {
-                // Move to the previous field if the current field is empty
-                _focusNodes[index - 1].requestFocus();
-              }
-            },
-            onSubmitted: (value) {
-              // Handle submission on the last field
-              if (index == 3) {
-                String pin = _controllers.map((controller) => controller.text).join();
-                widget.pinController.text = pin;
-                widget.onComplete(pin);
-
-                // Dismiss keyboard after PIN entry
-                FocusScope.of(context).unfocus();
-              }
-            },
           ),
-        );
-      }),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(4, (index) {
+              return Container(
+                width: 50,
+                child: TextField(
+                  controller: _controllers[index],
+                  focusNode: _focusNodes[index],
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  maxLength: 1,
+                  obscureText: true,
+                  textInputAction:
+                      index == 3 ? TextInputAction.done : TextInputAction.next,
+                  style: TextStyle(fontSize: 24),
+                  decoration: InputDecoration(
+                    counterText: "",
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(width: 2, color: Colors.blue[900]!),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(width: 2, color: Colors.blue[900]!),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly
+                  ], // Only numeric input
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      // Move to the next field if it's not the last field
+                      if (index < 3) {
+                        _focusNodes[index + 1].requestFocus();
+                      } else {
+                        // If the last field is filled, complete the PIN entry
+                        String pin = _controllers
+                            .map((controller) => controller.text)
+                            .join();
+                        widget.pinController.text = pin;
+                        widget.onComplete(pin);
+
+                        // Dismiss keyboard after PIN entry
+                        FocusScope.of(context).unfocus();
+                      }
+                    } else if (value.isEmpty && index > 0) {
+                      // Move to the previous field if the current field is empty
+                      _focusNodes[index - 1].requestFocus();
+                    }
+                  },
+                  onSubmitted: (value) {
+                    // Handle submission on the last field
+                    if (index == 3) {
+                      String pin = _controllers
+                          .map((controller) => controller.text)
+                          .join();
+                      widget.pinController.text = pin;
+                      widget.onComplete(pin);
+
+                      // Dismiss keyboard after PIN entry
+                      FocusScope.of(context).unfocus();
+                    }
+                  },
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 }

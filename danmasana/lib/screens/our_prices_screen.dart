@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class OurPricesScreen extends StatefulWidget {
   @override
@@ -7,31 +9,49 @@ class OurPricesScreen extends StatefulWidget {
 }
 
 class _OurPricesScreenState extends State<OurPricesScreen> {
-  final List<PriceData> _priceData = [
-    PriceData('MTN', '500', '4G'),
-    PriceData('Airtel', '1000', '9G'),
-    PriceData('Glo', '200', '1G'),
-    PriceData('9mobile', '1500', '3G'),
-  ];
-
+  List<PriceData> _priceData = [];
   late PriceDataSource _priceDataSource;
 
   @override
   void initState() {
     super.initState();
-    _priceDataSource = PriceDataSource(priceData: _priceData);
+    _fetchPrices(); // Fetch data when the screen initializes
+  }
+
+  Future<void> _fetchPrices() async {
+    final response = await http.get(Uri.parse('http://app.mikirudata.com.ng/api/get/data-plans'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<PriceData> fetchedPrices = [];
+
+      for (var item in data['data']) {
+        fetchedPrices.add(PriceData(
+          item['name'],             // Ensure this matches the API response structure
+          item['amount'].toString(), // Ensure it's a string
+          item['dataTypeName'],      // Ensure this matches the API response structure
+        ));
+      }
+
+      setState(() {
+        _priceData = fetchedPrices;
+        _priceDataSource = PriceDataSource(priceData: _priceData);
+      });
+    } else {
+      throw Exception('Failed to load prices');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         leading: IconButton(
-  icon: Icon(Icons.arrow_back, color: Colors.white),
-  onPressed: () {
-    Navigator.pop(context); // Navigate back to the previous route
-  },
-),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous route
+          },
+        ),
         title: Center(
           child: Text(
             'Prices',
@@ -55,62 +75,72 @@ class _OurPricesScreenState extends State<OurPricesScreen> {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.blue[900]!, width: 1),
-              ),
-              child: SfDataGrid(
-                source: _priceDataSource,
-                columns: <GridColumn>[
-                  GridColumn(
-                    columnName: 'network',
-                    label: Container(
-                      padding: EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Network',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[900],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Set width to 90% for small screens, 50% for larger screens
+                double tableWidth = constraints.maxWidth < 600 ? constraints.maxWidth * 0.9 : constraints.maxWidth * 0.5;
+
+                return Center(
+                  child: Container(
+                    width: tableWidth,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: Colors.blue[900]!, width: 1),
+                    ),
+                    child: SfDataGrid(
+                      source: _priceDataSource,
+                      columns: <GridColumn>[
+                        GridColumn(
+                          columnName: 'network',
+                          label: Container(
+                            padding: EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Network',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[900],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        GridColumn(
+                          columnName: 'amountSent',
+                          label: Container(
+                            padding: EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Amount',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[900],
+                              ),
+                            ),
+                          ),
+                        ),
+                        GridColumn(
+                          columnName: 'amountReceived',
+                          label: Container(
+                            padding: EdgeInsets.all(8),
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Data Type',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[900],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  GridColumn(
-                    columnName: 'amountSent',
-                    label: Container(
-                      padding: EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Amount Sent',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[900],
-                        ),
-                      ),
-                    ),
-                  ),
-                  GridColumn(
-                    columnName: 'amountReceived',
-                    label: Container(
-                      padding: EdgeInsets.all(8),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Amount Received',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[900],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],

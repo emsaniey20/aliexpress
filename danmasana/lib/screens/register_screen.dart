@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as https;
-import 'package:go_router/go_router.dart';
 import 'package:fluro/fluro.dart'; // Import Fluro
 
 class RegisterScreen extends StatefulWidget {
@@ -20,9 +19,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _transactionPinController = TextEditingController();
+  final TextEditingController _transactionPinController =
+      TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _bvnController = TextEditingController();
   final TextEditingController _ninController = TextEditingController();
 
@@ -39,7 +40,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       context: context,
       type: AlertType.info,
       title: "Important Information",
-      desc: "Please ensure you have either BVN or NIN before registering. Providing both is recommended for better verification.",
+      desc:
+          "Please ensure you have either BVN or NIN before registering. Providing both is recommended for better verification.",
       buttons: [
         DialogButton(
           child: const Text("Okay", style: TextStyle(color: Colors.white)),
@@ -118,8 +120,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           backgroundColor: Colors.blue[900],
                         ),
                         child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.blue)
-                            : const Text("Create your account", style: TextStyle(fontSize: 20, color: Colors.white)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.blue)
+                            : const Text("Create your account",
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white)),
                       ),
                       const SizedBox(height: 16),
                       _signup(context),
@@ -312,9 +317,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text('Already have an account?'),
-       TextButton(
+        TextButton(
           onPressed: () {
-            widget.router.navigateTo(context, '/auth/login'); // Navigate to the registration screen
+            widget.router.navigateTo(
+                context, '/auth/login'); // Navigate to the registration screen
           },
           child: Text(
             "Sign In",
@@ -346,7 +352,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Alert(
           context: context,
           type: AlertType.error,
-          title: "Error",
+          title: "Missing Information",
           desc: "Please provide either BVN or NIN.",
           buttons: [
             DialogButton(
@@ -364,19 +370,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       try {
         final response = await _register();
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+
         if (response.statusCode == 201) {
-          GoRouter.of(context).go('/dashboard');
+          Alert(
+            context: context,
+            type: AlertType.success,
+            title: "Registration Successful",
+            desc: "Your account has been created successfully. Please log in.",
+            buttons: [
+              DialogButton(
+                child:
+                    const Text("Okay", style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Navigator.pop(context); // Close alert
+                  widget.router.navigateTo(context, '/auth/login',
+                      clearStack: true); // Redirect to login screen
+                },
+              ),
+            ],
+          ).show();
         } else {
-          final Map<String, dynamic> responseBody = json.decode(response.body);
-          String message = responseBody['error'] ?? 'Registration failed';
+          String message = responseBody['message'] ??
+              'Registration was not successful. Please try again.';
+
           Alert(
             context: context,
             type: AlertType.error,
-            title: "Error",
+            title: "Registration Error",
             desc: message,
             buttons: [
               DialogButton(
-                child: const Text("Okay", style: TextStyle(color: Colors.white)),
+                child:
+                    const Text("Okay", style: TextStyle(color: Colors.white)),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -386,8 +412,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Alert(
           context: context,
           type: AlertType.error,
-          title: "Error",
-          desc: "An error occurred. Please try again later.",
+          title: "Connection Error",
+          desc:
+              "An error occurred. Please check your internet connection and try again.",
           buttons: [
             DialogButton(
               child: const Text("Okay", style: TextStyle(color: Colors.white)),
@@ -423,24 +450,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
- void _showBVNInfoDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("BVN and NIN Information"),
-          content: const Text(
-            "BVN (Bank Verification Number) and NIN (National Identification Number) are used for verifying your identity. Providing these numbers helps ensure a secure and accurate registration process.",
+void _showBVNInfoDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("BVN and NIN Information"),
+        content: const Text(
+          "BVN (Bank Verification Number) and NIN (National Identification Number) are used for verifying your identity. Providing these numbers helps ensure a secure and accurate registration process.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("Close"),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ],
+      );
+    },
+  );
+}
