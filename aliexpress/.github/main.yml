@@ -1,0 +1,38 @@
+name: Build Maven Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      
+
+      # Set up Java
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # or 'zulu', 'adopt', etc.
+          java-version: '17'  # Use the required JDK version
+
+      # Build the project with Maven
+      - name: Build with Maven
+        run: mvn clean install
+
+      # Optional: Archive build artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: target/*.jar
