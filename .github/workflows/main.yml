@@ -17,12 +17,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Change to the correct directory where pom.xml is located
+      - name: Change to project directory
+        run: cd aliexpress
+
       # Set up Java
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin' # or 'zulu', 'adopt', etc.
-          java-version: '17' # Use the required JDK version
+          distribution: 'temurin'  # or 'zulu', 'adopt', etc.
+          java-version: '17'  # Use the required JDK version
 
       # Build the project with Maven
       - name: Build with Maven
