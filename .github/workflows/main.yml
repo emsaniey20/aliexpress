@@ -19,7 +19,7 @@ jobs:
 
       # Change to the correct directory where pom.xml is located
       - name: Change to project directory
-        run: cd aliexpress
+        run: cd aliexpress/aliexpress
 
       # Set up Java
       - name: Set up JDK
