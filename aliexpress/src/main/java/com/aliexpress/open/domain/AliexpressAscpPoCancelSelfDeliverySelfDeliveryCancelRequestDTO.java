@@ -1,0 +1,61 @@
+package com.aliexpress.open.domain;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
+import java.lang.Integer;
+import java.lang.Short;
+import java.lang.Long;
+import java.lang.String;
+import java.lang.Byte;
+import java.lang.Object;
+import java.math.BigDecimal;
+import com.global.iop.api.*;
+import com.global.iop.util.*;
+import com.global.iop.util.json.*;
+import com.aliexpress.open.domain.*;
+import com.global.iop.infra.mapping.ApiField;
+import com.global.iop.infra.mapping.ApiListField;
+
+public class AliexpressAscpPoCancelSelfDeliverySelfDeliveryCancelRequestDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+        /** 自寄单号 */
+                @ApiField("self_delivery_no")
+            private String selfDeliveryNo;
+        /** 行业账套 AER 221000，AEG 288000 aechoice 5110000 */
+                @ApiField("biz_type")
+            private Integer bizType;
+        /** 渠道seller id （可以在这个API中查询：global.seller.relation.query）， 请使用 business_type = ONE_STOP_SERVICE 的全托管店铺 channel_seller_id */
+                @ApiField("channel_user_id")
+            private Long channelUserId;
+        /** 取消原因 */
+                @ApiField("cancel_reason")
+            private String cancelReason;
+    
+        public String getSelfDeliveryNo() {
+    return this.selfDeliveryNo;
+    }
+    public void setSelfDeliveryNo(String selfDeliveryNo) {
+    this.selfDeliveryNo = selfDeliveryNo;
+    }
+        public Integer getBizType() {
+    return this.bizType;
+    }
+    public void setBizType(Integer bizType) {
+    this.bizType = bizType;
+    }
+        public Long getChannelUserId() {
+    return this.channelUserId;
+    }
+    public void setChannelUserId(Long channelUserId) {
+    this.channelUserId = channelUserId;
+    }
+        public String getCancelReason() {
+    return this.cancelReason;
+    }
+    public void setCancelReason(String cancelReason) {
+    this.cancelReason = cancelReason;
+    }
+    }
